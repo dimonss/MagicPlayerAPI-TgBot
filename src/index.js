@@ -7,6 +7,8 @@ import tgBot from './tgBot/tgBot.js';
 import AudioWithAuth from "./middleware/audioWithAuth.js";
 import {checkAuth} from "./utils/commonUtils.js";
 import dotenv from 'dotenv';
+import CryptoJS from "crypto-js";
+import {v4 as uuidv4} from "uuid";
 
 dotenv.config();
 const HOSTNAME = process.env.HOSTNAME;
@@ -73,6 +75,28 @@ const startApp = async () => {
             delete client.favoriteProduct;
             if (error) return next(error);
             res.json(commonDto(client ? STATUS.OK : STATUS.NOT_FOUND, client ? 'Успешно авторизован' : 'Ошибка авторизации, попробуйте заново пройти регистрацию', client));
+        });
+    });
+    app.get('/auth', (req, res, next) => {
+        const {login, password} = req?.headers;
+        ClientSQL.findByLoginAndPassword({login, password: CryptoJS.SHA256(password).toString()}, (error, client) => {
+            if (error) return next(error);
+            if (client){
+                const token = uuidv4();
+                ClientSQL.updateToken({token, clientId: client.id}, (error) => {
+                    if (error) {
+                        res.status(500).json(commonDto(STATUS.AUTH_ERROR, 'Не удалось сгенерировать токен'));
+                    }
+                    if (client) {
+                        delete client.id
+                        delete client.token
+                        res.json(commonDto(STATUS.OK, 'Успешно авторизован', {token, ...client}));
+                    }
+                })
+            }
+            else {
+                res.status(401).json(commonDto(STATUS.AUTH_ERROR, 'Ошибка авторизации'));
+            }
         });
     });
 };
