@@ -35,3 +35,8 @@ export const getAndSqlReq = (searchText) => {
         initialValue,
     );
 };
+
+export const getRandomNumber = () => {
+    const randomNumber = Math.floor(Math.random() * 10000);
+    return randomNumber.toString().padStart(4, '0');
+}

@@ -77,6 +77,10 @@ class ClientSQL {
     static cart(login, cb) {
         client.get(`SELECT id FROM client WHERE login = ?`, login, cb);
     }
+    static updatePassword(data, cb) {
+        const sql = 'UPDATE client SET password = ?, login= ? WHERE chatId = ?';
+        client.run(sql, data.password, data.login, data.chatId, cb);
+    }
 }
 
 export default ClientSQL;

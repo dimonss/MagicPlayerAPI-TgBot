@@ -30,9 +30,13 @@ const tgBot = (token) => {
             return
         }
         //CLIENT////////////////////////////////////////////////////////////////////////////////////////////////////
-
+        if (text === COMMAND.GENERATE_PASSWORD) {
+            await client.setAndUpdatePassword()
+            return
+        }
         if (msg?.contact?.phone_number) {
             await client.clientRegistration()
+            return
         }
         await utils.errorRequest()
     });
