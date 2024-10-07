@@ -72,7 +72,7 @@ const startApp = async () => {
         const token = req?.headers?.auth;
         ClientSQL.findByToken(token, (error, client) => {
             if (error) return next(error);
-            res.json(commonDto(client ? STATUS.OK : STATUS.NOT_FOUND, client ? 'Успешно авторизован' : 'Ошибка авторизации, попробуйте заново пройти регистрацию', client));
+            res.json(commonDto(client ? STATUS.OK : STATUS.NOT_FOUND, client ? 'Токен валиден' : 'Ошибка токена. Авторизуйтесь заново', client));
         });
     });
     app.get('/auth', (req, res, next) => {
