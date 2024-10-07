@@ -72,14 +72,16 @@ const startApp = async () => {
         const token = req?.headers?.auth;
         ClientSQL.findByToken(token, (error, client) => {
             if (error) return next(error);
-            res.json(commonDto(client ? STATUS.OK : STATUS.NOT_FOUND, client ? 'Токен валиден' : 'Ошибка токена. Авторизуйтесь заново', client));
+            if (!client) res.status(401).json(commonDto(STATUS.NOT_FOUND, 'Ошибка токена. Авторизуйтесь заново', client));
+            else
+                res.json(commonDto(STATUS.OK, client ? 'Токен валиден' : 'Ошибка токена. Авторизуйтесь заново', client));
         });
     });
     app.get('/auth', (req, res, next) => {
         const {login, password} = req?.headers;
         ClientSQL.findByLoginAndPassword({login, password: CryptoJS.SHA256(password).toString()}, (error, client) => {
             if (error) return next(error);
-            if (client){
+            if (client) {
                 const token = uuidv4();
                 ClientSQL.updateToken({token, clientId: client.id}, (error) => {
                     if (error) {
@@ -91,8 +93,7 @@ const startApp = async () => {
                         res.json(commonDto(STATUS.OK, 'Успешно авторизован', {token, ...client}));
                     }
                 })
-            }
-            else {
+            } else {
                 res.status(401).json(commonDto(STATUS.AUTH_ERROR, 'Ошибка авторизации'));
             }
         });
