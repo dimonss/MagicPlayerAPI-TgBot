@@ -38,7 +38,7 @@ class ClientSQL {
     }
 
     static findByToken(token, cb) {
-        client.get('SELECT firstname, lastname, photo, favoriteProduct, cart, phoneNumber, token, discount FROM client WHERE token = ?', token, cb);
+        client.get('SELECT firstname, lastname, username FROM client WHERE token = ?', token, cb);
     }
 
     static _findByToken(token, cb) {

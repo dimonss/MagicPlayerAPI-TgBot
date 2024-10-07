@@ -71,8 +71,6 @@ const startApp = async () => {
     app.get('/client', (req, res, next) => {
         const token = req?.headers?.auth;
         ClientSQL.findByToken(token, (error, client) => {
-            delete client.cart;
-            delete client.favoriteProduct;
             if (error) return next(error);
             res.json(commonDto(client ? STATUS.OK : STATUS.NOT_FOUND, client ? 'Успешно авторизован' : 'Ошибка авторизации, попробуйте заново пройти регистрацию', client));
         });
