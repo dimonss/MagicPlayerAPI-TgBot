@@ -1,38 +1,46 @@
+# MagicPlayerAPI with Telegram Bot Integration
 
-# Express.js Backend with Telegram Bot Authentication
-
-This project is an Express.js backend application that provides authentication via a Telegram bot. It handles user login using the Telegram API and serves as a secure backend for an associated web or mobile application.
+This project is a Node.js backend application that integrates with Telegram bot functionality. It provides authentication via Telegram and serves as a secure backend API with SQLite database support.
 
 ## Table of Contents
 
+- [Requirements](#requirements)
 - [Installation](#installation)
 - [Environment Variables](#environment-variables)
 - [Project Structure](#project-structure)
 - [Scripts](#scripts)
 - [Usage](#usage)
-- [API Endpoints](#api-endpoints)
-- [Telegram Bot Setup](#telegram-bot-setup)
+- [Database](#database)
+- [Telegram Bot Integration](#telegram-bot-integration)
+
+## Requirements
+
+- Node.js (v20 or higher)
+- npm or yarn
+- SQLite
 
 ## Installation
 
-To install the project dependencies, ensure you have **Node.js** (v20 or higher) installed and run the following command:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/MagicPlayerAPI-TgBot.git
+   cd MagicPlayerAPI-TgBot
+   ```
 
-```bash
-npm install
-```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-### Environment Variables
+## Environment Variables
 
-This project uses environment variables to store sensitive configuration data. Create a `.env` file in the project root and include the following variables:
+Create a `.env` file in the project root with the following variables:
 
 ```bash
 PORT=4001
 TG_TOKEN=your-telegram-bot-token
 AUTH=your-secret-basic-auth
 ```
-
-- `TG_TOKEN`: The API token you received from BotFather after creating your bot.
-- `AUTH`: Basic auth.
 
 ## Project Structure
 
@@ -94,28 +102,11 @@ In the `package.json`, the following scripts are defined:
 
    The application will start on `http://localhost:3000`.
 
-## API-endpoints
+## Database
 
-- **POST /auth/telegram**: Initiates the login process using Telegram.
-  - Request Body:
-    ```json
-    {
-      "telegramId": "your-telegram-id",
-      "authData": "Telegram authorization data"
-    }
-    ```
+This project uses SQLite as its database.
 
-  - Response:
-    ```json
-    {
-      "success": true,
-      "token": "jwt-token-here"
-    }
-    ```
-
-- **GET /protected**: A sample protected route that requires JWT authentication.
-
-## Telegram Bot Setup
+## Telegram Bot Integration
 
 1. **Create a Telegram Bot**:
 
