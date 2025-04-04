@@ -64,7 +64,7 @@ class TgBotClientImpl {
                                             await this.bot.sendMessage(this.chatId, `Упс.\nЧто то пошло не так.\nМы уже работаем над устранением ошибки\nПопробуйте позже`,);
                                             return;
                                         }
-                                        await this.bot.sendMessage(this.chatId, `Ваши контактные данные успешно сохранены, для установки пароля используйте команду ${COMMAND.SET_PASSWORD}`,);
+                                        await this.bot.sendMessage(this.chatId, `Ваши контактные данные успешно сохранены, для установки пароля используйте команду ${COMMAND.GENERATE_PASSWORD}`,);
                                     },);
                                 },);
                             })
@@ -88,7 +88,7 @@ class TgBotClientImpl {
                                 await this.bot.sendMessage(this.chatId, `Упс.\nЧто то пошло не так.\nМы уже работаем над устранением ошибки\nПопробуйте позже`,);
                                 return;
                             }
-                            await this.bot.sendMessage(this.chatId, `Ваши контактные данные успешно сохранены, для установки пароля используйте команду ${COMMAND.SET_PASSWORD}`,);
+                            await this.bot.sendMessage(this.chatId, `Ваши контактные данные успешно сохранены, для установки пароля используйте команду ${COMMAND.GENERATE_PASSWORD}`,);
                         },);
                     }
                 });

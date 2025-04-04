@@ -39,8 +39,7 @@ class TgBotUtilsImpl {
             if (client) {
                 await this.bot.sendMessage(this.chatId, `Вы идентифицированный пользователь` +
                     `\nВас зовут ${client?.firstname || '🤨'} ${(client?.lastname || '')}` +
-                    `\nВаш номер: ${client?.phoneNumber}` +
-                    {parse_mode: 'HTML'}
+                    `\nВаш номер: ${client?.phoneNumber}`
                 );
             } else {
                 await this.bot.sendMessage(this.chatId, `Вы не идентифицированный пользователь\nДля идентификации используйте команду: ` + COMMAND.START)
