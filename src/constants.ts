@@ -1,0 +1,8 @@
+export enum STATUS {
+    OK = 200,
+    ERROR = 400,
+    NOT_FOUND = 404,
+    AUTH_ERROR = 401
+}
+
+export const MY_LOGO_STICKER = 'CAACAgIAAxkBAAIFI2UREK8tdg0xz6kqUEmYGRrKlqxvAAJQNQAC8IZxSImpIa_aXO3YMAQ'; 

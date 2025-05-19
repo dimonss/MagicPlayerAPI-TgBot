@@ -1,6 +1,6 @@
 # MagicPlayerAPI with Telegram Bot Integration
 
-This project is a Node.js backend application that integrates with Telegram bot functionality. It provides authentication via Telegram and serves as a secure backend API with SQLite database support.
+This project is a Node.js backend application written in TypeScript that integrates with Telegram bot functionality. It provides authentication via Telegram and serves as a secure backend API with SQLite database support.
 
 ## Table of Contents
 
@@ -40,93 +40,84 @@ Create a `.env` file in the project root with the following variables:
 PORT=4001
 TG_TOKEN=your-telegram-bot-token
 AUTH=your-secret-basic-auth
+HOSTNAME=localhost
 ```
 
 ## Project Structure
 
 ```
 /src
-  /controllers
-    - authController.js      # Handles authentication logic
-  /middlewares
-    - authMiddleware.js      # JWT authentication middleware
-  /routes
-    - authRoutes.js          # Defines API routes for Telegram login
-  /services
-    - telegramService.js     # Manages Telegram API interactions
-  - app.js                   # Main Express app setup
-.env                          # Environment configuration
-package.json                  # Project configuration and dependencies
+  /constants      # Application constants and enums
+  /db            # Database models and configurations
+  /DTO           # Data Transfer Objects
+  /middleware    # Express middlewares
+  /tgBot         # Telegram bot implementation
+  /types         # TypeScript type definitions
+  /utils         # Utility functions
+  constants.ts   # Global constants
+  index.ts       # Application entry point
+/static          # Static files
+migrations.js    # Database migrations
 ```
 
 ## Scripts
 
-In the `package.json`, the following scripts are defined:
+Available npm scripts:
 
 ```json
 {
-  "scripts": {
-    "start": "node src/app.js",
-    "dev": "nodemon src/app.js",
-    "test": "jest"
-  }
+  "start:dev": "Run the application in development mode with hot reloading",
+  "start:prod": "Build and run the application in production mode",
+  "build": "Build the TypeScript project",
+  "lint": "Run ESLint on TypeScript files",
+  "format": "Format TypeScript files using ESLint"
 }
 ```
 
-- **`npm start`**: Starts the application in production mode.
-- **`npm run dev`**: Starts the application in development mode with live reloading (using `nodemon`).
-- **`npm test`**: Runs the test suite (if tests are set up).
-
 ## Usage
 
-1. Clone the repository:
-
+1. Set up your environment variables in `.env`
+2. Run the development server:
    ```bash
-   git clone https://github.com/dimonss/MagicPlayerAPI-TgBot.git
-   cd MagicPlayerAPI-TgBot
+   npm run start:dev
    ```
-
-2. Install dependencies:
-
+   or for production:
    ```bash
-   npm install
+   npm run start:prod
    ```
-
-3. Set up the `.env` file with your environment variables.
-
-4. Run the application:
-
-   ```bash
-   npm run dev
-   ```
-
-   The application will start on `http://localhost:3000`.
 
 ## Database
 
-This project uses SQLite as its database.
+The project uses SQLite as its database. The database file is `db.sqlite` in the root directory. Migrations can be run using the `migrations.js` file.
+
+## Dependencies
+
+Main dependencies include:
+- Express.js for the web server
+- node-telegram-bot-api for Telegram integration
+- Sequelize as ORM
+- SQLite for database
+- TypeScript for development
+
+Development tools:
+- ESLint for code linting
+- Prettier for code formatting
+- ts-node-dev for development server
+- TypeScript and related tools
 
 ## Telegram Bot Integration
 
-1. **Create a Telegram Bot**:
+1. Create a new bot through BotFather on Telegram
+2. Get your bot token and add it to `.env`
+3. The bot implementation can be found in the `/src/tgBot` directory
 
-  - Go to Telegram, find **BotFather** and create a new bot.
-  - Save the bot token you receive.
+## Development
 
-2. **Set Webhook**:
-
-   You'll need to set up a webhook to receive updates from Telegram when users interact with the bot. Run the following cURL command to set your webhook URL:
-
-   ```bash
-   curl -F "url=https://your-domain.com/auth/telegram/webhook" "https://api.telegram.org/bot<YOUR_BOT_TOKEN>/setWebhook"
-   ```
-
-   Replace `<YOUR_BOT_TOKEN>` with your bot token and `https://dich.tech/magic_player` with your server URL.
-
-3. **Telegram Login Widget**:
-
-  - Use the [Telegram login widget](https://core.telegram.org/widgets/login) to allow users to log in via Telegram on your frontend.
+- The project uses TypeScript for better type safety
+- ESLint and Prettier are configured for code quality
+- Husky is set up for pre-commit hooks
+- ts-node-dev is configured for development with hot reloading
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
