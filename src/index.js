@@ -13,8 +13,6 @@ import {v4 as uuidv4} from "uuid";
 dotenv.config();
 const HOSTNAME = process.env.HOSTNAME;
 export const TG_TOKEN = process.env.TG_TOKEN;
-console.log("TG_TOKEN");
-console.log(TG_TOKEN);
 export const AUTH = process.env.AUTH;
 const PORT = process.env.PORT || 4000;
 

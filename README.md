@@ -23,7 +23,7 @@ This project is a Node.js backend application that integrates with Telegram bot 
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/MagicPlayerAPI-TgBot.git
+   git clone https://github.com/dimonss/MagicPlayerAPI-TgBot.git
    cd MagicPlayerAPI-TgBot
    ```
 
