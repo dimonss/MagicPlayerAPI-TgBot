@@ -1,14 +1,15 @@
 import express from 'express';
 import ClientSQL from './db/ClientSQL.js';
-import {commonDto} from './DTO/common.js';
-import {STATUS} from './constants.js';
+import { commonDto } from './DTO/common.js';
+import { STATUS } from './constants.js';
 import fileUpload from 'express-fileupload';
 import tgBot from './tgBot/tgBot.js';
 import AudioWithAuth from "./middleware/audioWithAuth.js";
-import {checkAuth} from "./utils/commonUtils.js";
+import { checkAuth } from "./utils/commonUtils.js";
 import dotenv from 'dotenv';
 import CryptoJS from "crypto-js";
-import {v4 as uuidv4} from "uuid";
+import { v4 as uuidv4 } from "uuid";
+import AuthService from "./services/AuthService.js";
 
 dotenv.config();
 const HOSTNAME = process.env.HOSTNAME;
@@ -76,19 +77,19 @@ const startApp = async () => {
         });
     });
     app.get('/auth', (req, res, next) => {
-        const {login, password} = req?.headers;
-        ClientSQL.findByLoginAndPassword({login, password: CryptoJS.SHA256(password).toString()}, (error, client) => {
+        const { login, password } = req?.headers;
+        ClientSQL.findByLoginAndPassword({ login, password: CryptoJS.SHA256(password).toString() }, (error, client) => {
             if (error) return next(error);
             if (client) {
                 const token = uuidv4();
-                ClientSQL.updateToken({token, clientId: client.id}, (error) => {
+                ClientSQL.updateToken({ token, clientId: client.id }, (error) => {
                     if (error) {
                         res.status(500).json(commonDto(STATUS.AUTH_ERROR, 'Не удалось сгенерировать токен'));
                     }
                     if (client) {
                         delete client.id
                         delete client.token
-                        res.json(commonDto(STATUS.OK, 'Успешно авторизован', {token, ...client}));
+                        res.json(commonDto(STATUS.OK, 'Успешно авторизован', { token, ...client }));
                     }
                 })
             } else {
@@ -96,6 +97,32 @@ const startApp = async () => {
             }
         });
     });
+
+
+    // NEW AUTH SERVICE ENDPOINTS ///////////////////////////////////////
+    app.post('/auth/login', async (req, res) => {
+        try {
+            const { login, password } = req.body;
+            const result = await AuthService.login(login, password);
+            if (!result) {
+                return res.status(401).json(commonDto(STATUS.AUTH_ERROR, 'Invalid credentials'));
+            }
+            res.json(commonDto(STATUS.OK, 'Login successful', result));
+        } catch (e) {
+            res.status(500).json(commonDto(STATUS.ERROR, 'Internal server error', e.message));
+        }
+    });
+
+    app.get('/auth/verify', (req, res) => {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json(commonDto(STATUS.AUTH_ERROR, 'No token provided'));
+
+        const decoded = AuthService.verifyToken(token);
+        if (!decoded) return res.status(401).json(commonDto(STATUS.AUTH_ERROR, 'Invalid token'));
+
+        res.json(commonDto(STATUS.OK, 'Token valid', decoded));
+    });
+    /////////////////////////////////////////////////////////////////////
 };
 
 startApp();
