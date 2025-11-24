@@ -1,8 +1,9 @@
+import { Request, Response } from 'express';
 import { commonDto } from '../DTO/common.js';
 import { STATUS } from '../constants.js';
 import { AUTH } from '../index.js';
 
-export const checkAuth = (req, res) => {
+export const checkAuth = (req: Request, res: Response): boolean => {
     if (req?.headers?.authorization?.split(' ')[1] !== AUTH) {
         res.status(401).json(commonDto(STATUS.ERROR, 'error auth'));
         return false;
@@ -10,7 +11,7 @@ export const checkAuth = (req, res) => {
     return true;
 };
 
-export const getCurrentDate = () => {
+export const getCurrentDate = (): string => {
     const date = new Date();
     return (
         date.getFullYear() +
@@ -27,7 +28,7 @@ export const getCurrentDate = () => {
     );
 };
 
-export const getAndSqlReq = (searchText) => {
+export const getAndSqlReq = (searchText: string): string => {
     const searchMass = searchText.toLowerCase().split(' ');
     const initialValue = '';
     return searchMass.reduce(
@@ -36,7 +37,7 @@ export const getAndSqlReq = (searchText) => {
     );
 };
 
-export const getRandomNumber = () => {
+export const getRandomNumber = (): string => {
     const randomNumber = Math.floor(Math.random() * 10000);
     return randomNumber.toString().padStart(4, '0');
 }

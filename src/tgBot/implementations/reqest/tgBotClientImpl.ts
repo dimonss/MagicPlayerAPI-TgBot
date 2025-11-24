@@ -1,13 +1,19 @@
-import ClientSQL from "../../../db/ClientSQL.js";
+import ClientSQL, { Client } from "../../../db/ClientSQL.js";
 import { v4 as uuidv4 } from 'uuid';
 import { COMMAND } from "../../constants/tgBotConstants.js";
 import { TG_TOKEN } from "../../../index.js";
 import download from '../../../utils/fileSaver.js';
 import { getCurrentDate, getRandomNumber } from '../../../utils/commonUtils.js';
 import CryptoJS from 'crypto-js';
+import TelegramBot from 'node-telegram-bot-api';
 
 class TgBotClientImpl {
-    constructor(bot, msg) {
+    bot: TelegramBot;
+    chatId: number;
+    text?: string;
+    msg: TelegramBot.Message;
+
+    constructor(bot: TelegramBot, msg: TelegramBot.Message) {
         this.bot = bot;
         this.chatId = msg?.chat?.id;
         this.text = msg.text;
@@ -37,11 +43,15 @@ class TgBotClientImpl {
                 return;
             }
             if (!client) {
+                if (!this.msg.from) return;
                 var user_profile = this.bot.getUserProfilePhotos(this.msg.from.id);
                 const token = uuidv4();
                 user_profile.then(async (res) => {
                     let file_id;
                     try {
+                        if (!res.photos || res.photos.length === 0 || res.photos[0].length === 0) {
+                            throw new Error('No profile photos found');
+                        }
                         file_id = res.photos[0][0].file_id;
                         await this.bot
                             .getFile(file_id)
@@ -53,7 +63,7 @@ class TgBotClientImpl {
                                         lastName: this?.msg?.contact?.last_name || '',
                                         username: this?.msg?.from?.username || '',
                                         token,
-                                        chatId: this?.msg?.from?.id,
+                                        chatId: this?.msg?.from?.id.toString(),
                                         phoneNumber: this?.msg?.contact?.phone_number,
                                         photo: "client/" + fileName,
                                         discount: 5,
@@ -78,7 +88,7 @@ class TgBotClientImpl {
                             lastName: this?.msg?.contact?.last_name || '',
                             username: this?.msg?.from?.username || '',
                             token,
-                            chatId: this?.msg?.from?.id,
+                            chatId: this?.msg?.from?.id.toString(),
                             phoneNumber: this?.msg?.contact?.phone_number,
                             photo: '',
                             discount: 5,
@@ -105,6 +115,8 @@ class TgBotClientImpl {
             await this.bot.sendMessage(this.chatId, `Регистрация для ботов запрещена!`);
             return;
         }
+        if (!this.msg.from) return;
+
         ClientSQL.findByChatId(this.msg.from.id, async (error, client) => {
             if (error) {
                 await this.bot.sendMessage(this.chatId, `Упс.\nЧто то пошло не так.\nМы уже работаем над устранением ошибки\nПопробуйте позже`,);
@@ -112,7 +124,8 @@ class TgBotClientImpl {
             }
             if (client) {
                 const password = randomNumber
-                const login = client.username;
+                const login = client.username || '';
+                if (!this.msg.from) return;
                 ClientSQL.updatePassword({
                     password: CryptoJS.SHA256(password).toString(), login, chatId: this.msg.from.id
                 }, async (error) => {

@@ -1,4 +1,6 @@
-export const getKeyboardWithPhoneNumberRequest = () => ({
+import { SendMessageOptions } from 'node-telegram-bot-api';
+
+export const getKeyboardWithPhoneNumberRequest = (): SendMessageOptions => ({
     reply_markup: {
         keyboard: [[{
             text: '📲 Оставить номер телефона',

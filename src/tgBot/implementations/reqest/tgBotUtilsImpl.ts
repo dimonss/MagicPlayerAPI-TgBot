@@ -1,11 +1,18 @@
-import { MY_LOGO_STICKER} from "../../../constants.js";
+import { MY_LOGO_STICKER } from "../../../constants.js";
 import ClientSQL from "../../../db/ClientSQL.js";
-import {COMMAND} from "../../constants/tgBotConstants.js";
-import {getKeyboardWithPhoneNumberRequest} from "../../tgBotUtils.js";
+import { COMMAND } from "../../constants/tgBotConstants.js";
+import { getKeyboardWithPhoneNumberRequest } from "../../tgBotUtils.js";
+import TelegramBot from 'node-telegram-bot-api';
 
 
 class TgBotUtilsImpl {
-    constructor(bot, msg) {
+    bot: TelegramBot;
+    chatId: number;
+    text?: string;
+    msg: TelegramBot.Message;
+    isPrivat: boolean;
+
+    constructor(bot: TelegramBot, msg: TelegramBot.Message) {
         this.bot = bot;
         this.chatId = msg?.chat?.id;
         this.text = msg.text;
@@ -14,23 +21,23 @@ class TgBotUtilsImpl {
     }
 
     async getChatId() {
-        await this.bot.sendMessage(this.chatId, this.chatId)
+        await this.bot.sendMessage(this.chatId, this.chatId.toString())
     }
 
     async start() {
         await this.bot.sendSticker(this.chatId, MY_LOGO_STICKER);
-            await this.bot.sendMessage(
-                this.chatId,
-                `Добро пожаловать! =) \nЗдесь можно получить логин и пароль для авторизации на сайте dich.tech/magic_player${
-                    this.isPrivat
-                        ? '\nДля регистрации отправьте свой контакт нажав на кнопку снизу 👇'
-                        : 'Для получения ключей используйте личной переписке с ботом'
-                } `,
-                this.isPrivat ? getKeyboardWithPhoneNumberRequest() : {},
-            );
+        await this.bot.sendMessage(
+            this.chatId,
+            `Добро пожаловать! =) \nЗдесь можно получить логин и пароль для авторизации на сайте dich.tech/magic_player${this.isPrivat
+                ? '\nДля регистрации отправьте свой контакт нажав на кнопку снизу 👇'
+                : 'Для получения ключей используйте личной переписке с ботом'
+            } `,
+            this.isPrivat ? getKeyboardWithPhoneNumberRequest() : {},
+        );
     }
 
     async info() {
+        if (!this.msg.from) return;
         ClientSQL.findByChatId(this.msg.from.id, async (error, client) => {
             if (error) {
                 await this.bot.sendMessage(this.chatId, `Ваши данные не найдены`);

@@ -1,11 +1,11 @@
 import TelegramApi from 'node-telegram-bot-api';
-import { COMMAND, tgBotDisplayCommands} from './constants/tgBotConstants.js';
+import { COMMAND, tgBotDisplayCommands } from './constants/tgBotConstants.js';
 import TgBotUtilsImpl from './implementations/reqest/tgBotUtilsImpl.js';
 import TgBotClientImpl from "./implementations/reqest/tgBotClientImpl.js";
 
 
-const tgBot = (token) => {
-    const bot = new TelegramApi(token, {polling: true});
+const tgBot = (token: string) => {
+    const bot = new TelegramApi(token, { polling: true });
     bot.setMyCommands(tgBotDisplayCommands).then();
     bot.on('message', async (msg) => {
         const text = msg?.text;

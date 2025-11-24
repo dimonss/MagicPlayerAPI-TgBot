@@ -1,8 +1,8 @@
-import express from 'express';
-import ClientSQL from './db/ClientSQL.js';
+import express, { Request, Response, NextFunction } from 'express';
+import ClientSQL, { Client } from './db/ClientSQL.js';
 import { commonDto } from './DTO/common.js';
 import { STATUS } from './constants.js';
-import fileUpload from 'express-fileupload';
+import fileUpload, { UploadedFile } from 'express-fileupload';
 import tgBot from './tgBot/tgBot.js';
 import AudioWithAuth from "./middleware/audioWithAuth.js";
 import { checkAuth } from "./utils/commonUtils.js";
@@ -12,8 +12,8 @@ import { v4 as uuidv4 } from "uuid";
 import AuthService from "./services/AuthService.js";
 
 dotenv.config();
-const HOSTNAME = process.env.HOSTNAME;
-export const TG_TOKEN = process.env.TG_TOKEN;
+const HOSTNAME = process.env.HOSTNAME || 'localhost';
+export const TG_TOKEN = process.env.TG_TOKEN || '';
 export const AUTH = process.env.AUTH;
 const PORT = process.env.PORT || 4000;
 
@@ -22,7 +22,7 @@ app.use(fileUpload({}));
 export const bot = tgBot(TG_TOKEN);
 const startApp = async () => {
     try {
-        app.listen(PORT, HOSTNAME, () => {
+        app.listen(Number(PORT), HOSTNAME, () => {
             console.log(`Server started on ${PORT} port`);
         });
     } catch (e) {
@@ -37,10 +37,13 @@ const startApp = async () => {
     app.get('/product_with_auth', AudioWithAuth.get);
     app.get('/product_with_auth/:id', AudioWithAuth.findById);
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    app.post('/file_image', (req, res) => {
-        const file = req?.files.file;
+    app.post('/file_image', (req: Request, res: Response) => {
+        if (!req.files || Object.keys(req.files).length === 0) {
+            return res.status(400).json(commonDto(STATUS.ERROR, 'No files were uploaded.'));
+        }
+        const file = req.files.file as UploadedFile;
         if (file.size < 1000000) {
-            file.mv('/Users/macuser/Documents/my_project/ShopAPI/static/images/content/' + file?.name, (err) => {
+            file.mv('/Users/macuser/Documents/my_project/ShopAPI/static/images/content/' + file?.name, (err: any) => {
                 if (err) return res.status(400).send(err);
                 return res.status(201).json(commonDto(STATUS.OK, 'created'));
             });
@@ -50,7 +53,7 @@ const startApp = async () => {
     });
 
     //CLIENT/////////////////////////////////////////////
-    app.get('/clients', (req, res, next) => {
+    app.get('/clients', (req: Request, res: Response, next: NextFunction) => {
         if (checkAuth(req, res)) {
             ClientSQL.all((error, client) => {
                 if (error) return next(error);
@@ -58,7 +61,7 @@ const startApp = async () => {
             });
         }
     });
-    app.get('/client/:id', (req, res, next) => {
+    app.get('/client/:id', (req: Request, res: Response, next: NextFunction) => {
         if (checkAuth(req, res)) {
             const id = req?.params?.id;
             ClientSQL.find(id, (error, client) => {
@@ -67,21 +70,23 @@ const startApp = async () => {
             });
         }
     });
-    app.get('/client', (req, res, next) => {
+    app.get('/client', (req: Request, res: Response, next: NextFunction) => {
         const token = req?.headers?.auth;
-        ClientSQL.findByToken(token, (error, client) => {
+        ClientSQL.findByToken(token as string, (error, client) => {
             if (error) return next(error);
             if (!client) res.status(401).json(commonDto(STATUS.NOT_FOUND, 'Ошибка токена. Авторизуйтесь заново', client));
             else
                 res.json(commonDto(STATUS.OK, client ? 'Токен валиден' : 'Ошибка токена. Авторизуйтесь заново', client));
         });
     });
-    app.get('/auth', (req, res, next) => {
-        const { login, password } = req?.headers;
+    app.get('/auth', (req: Request, res: Response, next: NextFunction) => {
+        const login = req.headers.login as string;
+        const password = req.headers.password as string;
         ClientSQL.findByLoginAndPassword({ login, password: CryptoJS.SHA256(password).toString() }, (error, client) => {
             if (error) return next(error);
             if (client) {
                 const token = uuidv4();
+                if (!client.id) return res.status(500).json(commonDto(STATUS.ERROR, 'Client ID missing'));
                 ClientSQL.updateToken({ token, clientId: client.id }, (error) => {
                     if (error) {
                         res.status(500).json(commonDto(STATUS.AUTH_ERROR, 'Не удалось сгенерировать токен'));
@@ -100,7 +105,7 @@ const startApp = async () => {
 
 
     // NEW AUTH SERVICE ENDPOINTS ///////////////////////////////////////
-    app.post('/auth/login', async (req, res) => {
+    app.post('/auth/login', async (req: Request, res: Response) => {
         try {
             const { login, password } = req.body;
             const result = await AuthService.login(login, password);
@@ -108,12 +113,12 @@ const startApp = async () => {
                 return res.status(401).json(commonDto(STATUS.AUTH_ERROR, 'Invalid credentials'));
             }
             res.json(commonDto(STATUS.OK, 'Login successful', result));
-        } catch (e) {
+        } catch (e: any) {
             res.status(500).json(commonDto(STATUS.ERROR, 'Internal server error', e.message));
         }
     });
 
-    app.get('/auth/verify', (req, res) => {
+    app.get('/auth/verify', (req: Request, res: Response) => {
         const token = req.headers.authorization?.split(' ')[1];
         if (!token) return res.status(401).json(commonDto(STATUS.AUTH_ERROR, 'No token provided'));
 

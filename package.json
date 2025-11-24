@@ -22,10 +22,16 @@
   },
   "devDependencies": {
     "@types/cors": "^2.8.13",
+    "@types/crypto-js": "^4.2.2",
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.17",
+    "@types/express-fileupload": "^1.5.1",
     "@types/helmet": "^4.0.0",
-    "@types/node": "^20.5.1",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^24.10.1",
+    "@types/node-telegram-bot-api": "^0.64.13",
+    "@types/sqlite3": "^3.1.11",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^6.4.0",
     "@typescript-eslint/parser": "^6.4.0",
     "eslint": "^8.47.0",
@@ -33,9 +39,9 @@
     "nodemon": "^3.0.1",
     "prettier": "^3.0.2",
     "rimraf": "^5.0.1",
-    "ts-node": "^10.9.1",
+    "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.1.6"
+    "typescript": "^5.9.3"
   },
   "husky": {
     "hooks": {
@@ -43,10 +49,10 @@
     }
   },
   "scripts": {
-    "start:dev": "nodemon src/index.js",
-    "start:prod": "node src/index.js",
-    "build": "rimraf ./build && npx tsc",
-    "lint": "npx eslint ./src",
-    "format": "npx eslint ./src --fix"
+    "start:dev": "nodemon src/index.ts",
+    "start:prod": "node build/index.js",
+    "build": "rimraf ./build && tsc",
+    "lint": "eslint ./src",
+    "format": "eslint ./src --fix"
   }
 }
