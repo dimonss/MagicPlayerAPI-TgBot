@@ -4,5 +4,5 @@
   ],
   "ext": ".ts,.js",
   "ignore": [],
-  "exec": "npx ts-node"
+  "exec": "node --loader ts-node/esm"
 }

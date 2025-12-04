@@ -10,6 +10,8 @@ import dotenv from 'dotenv';
 import CryptoJS from "crypto-js";
 import { v4 as uuidv4 } from "uuid";
 import AuthService from "./services/AuthService.js";
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from './config/swagger.js';
 
 dotenv.config();
 const HOSTNAME = process.env.HOSTNAME || 'localhost';
@@ -31,12 +33,97 @@ const startApp = async () => {
     }
     app.use(express.json());
 
+    // Swagger API Documentation
+    app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
     //PRODUCT/////////////////////////////////////////////
 
+    /**
+     * @swagger
+     * /product/search_with_auth/{searchText}:
+     *   get:
+     *     summary: Search products with authentication
+     *     tags: [Products]
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: searchText
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: Search query text
+     *     responses:
+     *       200:
+     *         description: Search results
+     *       401:
+     *         description: Unauthorized
+     */
     app.get('/product/search_with_auth/:searchText', AudioWithAuth.find);
+
+    /**
+     * @swagger
+     * /product_with_auth:
+     *   get:
+     *     summary: Get all products with authentication
+     *     tags: [Products]
+     *     security:
+     *       - bearerAuth: []
+     *     responses:
+     *       200:
+     *         description: List of products
+     *       401:
+     *         description: Unauthorized
+     */
     app.get('/product_with_auth', AudioWithAuth.get);
+
+    /**
+     * @swagger
+     * /product_with_auth/{id}:
+     *   get:
+     *     summary: Get product by ID with authentication
+     *     tags: [Products]
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: Product ID
+     *     responses:
+     *       200:
+     *         description: Product details
+     *       401:
+     *         description: Unauthorized
+     *       404:
+     *         description: Product not found
+     */
     app.get('/product_with_auth/:id', AudioWithAuth.findById);
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * @swagger
+     * /file_image:
+     *   post:
+     *     summary: Upload an image file
+     *     tags: [Files]
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         multipart/form-data:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               file:
+     *                 type: string
+     *                 format: binary
+     *     responses:
+     *       201:
+     *         description: File uploaded successfully
+     *       400:
+     *         description: No files uploaded or file too large
+     */
     app.post('/file_image', (req: Request, res: Response) => {
         if (!req.files || Object.keys(req.files).length === 0) {
             return res.status(400).json(commonDto(STATUS.ERROR, 'No files were uploaded.'));
@@ -53,6 +140,20 @@ const startApp = async () => {
     });
 
     //CLIENT/////////////////////////////////////////////
+    /**
+     * @swagger
+     * /clients:
+     *   get:
+     *     summary: Get all clients
+     *     tags: [Clients]
+     *     security:
+     *       - bearerAuth: []
+     *     responses:
+     *       200:
+     *         description: List of all clients
+     *       401:
+     *         description: Unauthorized
+     */
     app.get('/clients', (req: Request, res: Response, next: NextFunction) => {
         if (checkAuth(req, res)) {
             ClientSQL.all((error, client) => {
@@ -61,6 +162,30 @@ const startApp = async () => {
             });
         }
     });
+
+    /**
+     * @swagger
+     * /client/{id}:
+     *   get:
+     *     summary: Get client by ID
+     *     tags: [Clients]
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: Client ID
+     *     responses:
+     *       200:
+     *         description: Client details
+     *       401:
+     *         description: Unauthorized
+     *       404:
+     *         description: Client not found
+     */
     app.get('/client/:id', (req: Request, res: Response, next: NextFunction) => {
         if (checkAuth(req, res)) {
             const id = req?.params?.id;
@@ -70,6 +195,26 @@ const startApp = async () => {
             });
         }
     });
+
+    /**
+     * @swagger
+     * /client:
+     *   get:
+     *     summary: Verify client token
+     *     tags: [Clients]
+     *     parameters:
+     *       - in: header
+     *         name: auth
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: Authentication token
+     *     responses:
+     *       200:
+     *         description: Token is valid
+     *       401:
+     *         description: Invalid token
+     */
     app.get('/client', (req: Request, res: Response, next: NextFunction) => {
         const token = req?.headers?.auth;
         ClientSQL.findByToken(token as string, (error, client) => {
@@ -79,6 +224,30 @@ const startApp = async () => {
                 res.json(commonDto(STATUS.OK, client ? 'Токен валиден' : 'Ошибка токена. Авторизуйтесь заново', client));
         });
     });
+
+    /**
+     * @swagger
+     * /auth:
+     *   get:
+     *     summary: Authenticate user (legacy)
+     *     tags: [Authentication]
+     *     parameters:
+     *       - in: header
+     *         name: login
+     *         required: true
+     *         schema:
+     *           type: string
+     *       - in: header
+     *         name: password
+     *         required: true
+     *         schema:
+     *           type: string
+     *     responses:
+     *       200:
+     *         description: Authentication successful
+     *       401:
+     *         description: Authentication failed
+     */
     app.get('/auth', (req: Request, res: Response, next: NextFunction) => {
         const login = req.headers.login as string;
         const password = req.headers.password as string;
@@ -105,6 +274,34 @@ const startApp = async () => {
 
 
     // NEW AUTH SERVICE ENDPOINTS ///////////////////////////////////////
+    /**
+     * @swagger
+     * /auth/login:
+     *   post:
+     *     summary: User login
+     *     tags: [Authentication]
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required:
+     *               - login
+     *               - password
+     *             properties:
+     *               login:
+     *                 type: string
+     *               password:
+     *                 type: string
+     *     responses:
+     *       200:
+     *         description: Login successful
+     *       401:
+     *         description: Invalid credentials
+     *       500:
+     *         description: Internal server error
+     */
     app.post('/auth/login', async (req: Request, res: Response) => {
         try {
             const { login, password } = req.body;
@@ -118,6 +315,20 @@ const startApp = async () => {
         }
     });
 
+    /**
+     * @swagger
+     * /auth/verify:
+     *   get:
+     *     summary: Verify JWT token
+     *     tags: [Authentication]
+     *     security:
+     *       - bearerAuth: []
+     *     responses:
+     *       200:
+     *         description: Token is valid
+     *       401:
+     *         description: Invalid or missing token
+     */
     app.get('/auth/verify', (req: Request, res: Response) => {
         const token = req.headers.authorization?.split(' ')[1];
         if (!token) return res.status(401).json(commonDto(STATUS.AUTH_ERROR, 'No token provided'));
